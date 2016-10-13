@@ -92,6 +92,7 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public Boolean visitProg(ExprParser.ProgContext ctx) {
+        System.out.println("Entrou em Prog!!\n");
         int totalfilhos = ctx.getChildCount();
 
         if (totalfilhos < 2) {
@@ -121,12 +122,18 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * {@link #visitChildren} on {@code ctx}.</p>
      */
     @Override public Boolean visitOp2Atom(ExprParser.Op2AtomContext ctx) {
+        Boolean temp;
         if (ctx.op.getType() == ExprParser.OR) { // expr .O. expr
             if (getValor((ParseTree) ctx)) {
                 //beta OR
+                //salvar a pilha
+                Stack<ParseTree> copia = new Stack<ParseTree>();
+                copia = pilha;
                 setValor(ctx.expr(0), true);
                 setValor(ctx.expr(1), true);
-                return (visit(ctx.expr(0)) && visit(ctx.expr(1)));
+                temp = visit(ctx.expr(0));
+                pilha = copia;
+                return (temp && visit(ctx.expr(1)));
             } else {
                 //alpha OR CONSERTAR
                 setValor(ctx.expr(0), false);
@@ -138,9 +145,14 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
         } else if (ctx.op.getType() == ExprParser.IMP) { // expr .I. expr
             if (getValor(ctx)) {
                 //beta IMP
+                //salvar a pilha
+                Stack<ParseTree> copia = new Stack<ParseTree>();
+                copia = pilha;
                 setValor(ctx.expr(0), false);
                 setValor(ctx.expr(1), true);
-                return (visit(ctx.expr(0)) && visit(ctx.expr(1)));
+                temp = visit(ctx.expr(0));
+                pilha = copia;
+                return (temp && visit(ctx.expr(1)));
             } else {
                 //alpha IMP CONSERTAR
                 setValor(ctx.expr(0), true);
@@ -159,9 +171,13 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
                 return visit(ctx.expr(0));
             } else {
                 //beta AND
+                Stack<ParseTree> copia = new Stack<ParseTree>();
+                copia = pilha;
                 setValor(ctx.expr(0), false);
                 setValor(ctx.expr(1), false);
-                return (visit(ctx.expr(0)) && visit(ctx.expr(1)));
+                temp = visit(ctx.expr(0));
+                pilha = copia;
+                return (temp && visit(ctx.expr(1)));
             }
         } else {
             throw new IllegalStateException();

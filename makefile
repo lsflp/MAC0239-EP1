@@ -9,6 +9,6 @@ antlr4:
 compile:
 	$(CC) *.java
 exec:
-	$(VM) org.antlr.v4.gui.TestRig Expr prog -gui
+	#$(VM) org.antlr.v4.gui.TestRig Expr prog -gui < input
 clean:
 	rm *.class *.tokens

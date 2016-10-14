@@ -5,20 +5,20 @@ import java.io.InputStream;
  
 public class Tableaux {
     public static void main(String[] args) throws Exception {
-        InputStream is = (args.length == 0)
-            ?  System.in
-            : new FileInputStream(args[0]);
-         
+        String inputFile = null;
+        if ( args.length>0 ) inputFile = args[0];
+        InputStream is = System.in;
+        if ( inputFile!=null ) is = new FileInputStream(inputFile);
         ANTLRInputStream input = new ANTLRInputStream(is);
         ExprLexer lexer = new ExprLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ExprParser parser = new ExprParser(tokens);
-         
-        ParseTree tree = parser.prog();
+        ParseTree tree = parser.tableaux(); // parse; start at prog
+        System.out.println(tree.toStringTree(parser)); // print tree as text
          
         EvalVisitor eval = new EvalVisitor();
-        eval.visit(tree);
-        
+        System.out.println(eval.visit(tree));
+
         System.out.println("teste\n");
     }
 }

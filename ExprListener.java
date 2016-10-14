@@ -7,6 +7,16 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface ExprListener extends ParseTreeListener {
 	/**
+	 * Enter a parse tree produced by {@link ExprParser#tableaux}.
+	 * @param ctx the parse tree
+	 */
+	void enterTableaux(ExprParser.TableauxContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ExprParser#tableaux}.
+	 * @param ctx the parse tree
+	 */
+	void exitTableaux(ExprParser.TableauxContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ExprParser#prog}.
 	 * @param ctx the parse tree
 	 */

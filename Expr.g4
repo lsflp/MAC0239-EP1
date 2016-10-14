@@ -1,6 +1,8 @@
 grammar Expr; 
 
-prog:	expr*;										
+tableaux:	prog EOF;
+
+prog:	expr*;																												
 
 expr:	op='.N.' expr								# OpNot
     |	expr op=('.O.'|'.A.'|'.I.') expr    		# Op2Atom

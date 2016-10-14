@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.Stack;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.misc.NotNull;
  
 public class EvalVisitor extends ExprBaseVisitor<Boolean> {
     ParseTreeProperty<Boolean> valores = new ParseTreeProperty<Boolean>();
@@ -91,8 +92,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public Boolean visitProg(ExprParser.ProgContext ctx) {
-        System.out.println("Entrou em Prog!!\n");
+    @Override 
+    public Boolean visitProg(ExprParser.ProgContext ctx) {
+        System.out.println("Entrou em Prog!\n");
         int totalfilhos = ctx.getChildCount();
 
         if (totalfilhos < 2) {
@@ -113,7 +115,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
             pilha.push(ctx.getChild(i));
         }
         //retorna o valor pra o pop daquele stack
-        return visit(pilha.pop());
+        Boolean saida = visit(pilha.pop());
+        System.out.println (saida);
+        return saida;
     }
     /**
      * {@inheritDoc}
@@ -121,10 +125,12 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public Boolean visitOp2Atom(ExprParser.Op2AtomContext ctx) {
+    @Override 
+    public Boolean visitOp2Atom(ExprParser.Op2AtomContext ctx) {
+        System.out.println("Entrou em Op2Atom!!\n");
         Boolean temp;
         if (ctx.op.getType() == ExprParser.OR) { // expr .O. expr
-            if (getValor((ParseTree) ctx)) {
+            if (getValor(ctx)) {
                 //beta OR
                 //salvar a pilha
                 Stack<ParseTree> copia = new Stack<ParseTree>();
@@ -189,7 +195,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public Boolean visitAtom(ExprParser.AtomContext ctx) { 
+    @Override 
+    public Boolean visitAtom(ExprParser.AtomContext ctx) {
+        System.out.println("Entrou em Atom!!\n");
         //adicionar no set
         if (atomos.containsKey(ctx.getText())) {
             if (atomos.get(ctx.getText()) == getValor(ctx)) {
@@ -230,7 +238,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public Boolean visitOpNot(ExprParser.OpNotContext ctx) {
+    @Override 
+    public Boolean visitOpNot(ExprParser.OpNotContext ctx) {
+        System.out.println("Entrou em OpNot!!\n");
         if (getValor(ctx)) {
             //alpha NOT CONSERTAR
             setValor(ctx.expr(), false);
@@ -246,8 +256,19 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public Boolean visitParen(ExprParser.ParenContext ctx) {
+    @Override 
+    public Boolean visitParen(ExprParser.ParenContext ctx) {
+        System.out.println("Entrou em Paren!!\n");
         setValor(ctx.expr(), getValor(ctx));
         return visit(ctx.expr());
+    }
+
+    public static void main(String[] args) {
+        String expression = "(.N. a) .A. a";
+        ExprLexer lexer = new ExprLexer(new ANTLRInputStream(expression));
+        ExprParser parser = new ExprParser(new CommonTokenStream(lexer));
+        ParseTree tree = parser.expr();
+        Boolean answer = new EvalVisitor().visit(tree);
+        System.out.println(expression + " = " + answer);
     }
 }

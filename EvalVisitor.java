@@ -116,10 +116,30 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
         for (int i = totalfilhos - 2; i >= 0; i--) {
             pilha.push(ctx.getChild(i));
         }
-        Boolean saida = true;
-        //retorna o valor pra o pop daquele stack
-        while (!pilha.empty() && saida) saida = visit(pilha.pop());
+        Boolean saida = visit(pilha.pop());
         System.out.println (saida);
+        if (saida)
+            System.out.println("O sequente é válido!");
+        else {
+            
+            System.out.println("O sequente é inválido!");
+            // Get a set of the entries
+            Set set = atomos.entrySet();
+
+            // Get an iteravtor
+            Iterator it = set.iterator();
+
+            // Display elements
+            while (it.hasNext()) {
+                Map.Entry me = (Map.Entry) it.next();
+                System.out.print(me.getKey() + " - ");
+                if ((Boolean) me.getValue())
+                    System.out.print("T; ");
+                else
+                    System.out.print("F; ");
+                System.out.print("\n");
+            }
+        }
         return saida;
     }
     /**
@@ -135,12 +155,11 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
             if (getValor((ParseTree) ctx)) {
                 //beta OR
                 System.out.println("salvei a pilha"); //salvar a pilha
-                Stack<ParseTree> copia = new Stack<ParseTree>();
-                copia = pilha;
+                Stack<ParseTree> copia = (Stack<ParseTree>) pilha.clone();
                 setValor(ctx.expr(0), true);
                 setValor(ctx.expr(1), true);
                 temp = visit(ctx.expr(0));
-                pilha = copia;
+                pilha = (Stack<ParseTree>) copia.clone();
                 System.out.println("visitando segundo ramo do beta");
                 temp2 = visit(ctx.expr(1));
                 return (temp && temp2);
@@ -156,12 +175,11 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
             if (getValor(ctx)) {
                 //beta IMP
                 System.out.println("salvei a pilha"); //salvar a pilha
-                Stack<ParseTree> copia = new Stack<ParseTree>();
-                copia = pilha;
+                Stack<ParseTree> copia = (Stack<ParseTree>) pilha.clone();
                 setValor(ctx.expr(0), false);
                 setValor(ctx.expr(1), true);
                 temp = visit(ctx.expr(0));
-                pilha = copia;
+                pilha = (Stack<ParseTree>) copia.clone();
                 System.out.println("visitando segundo ramo do beta");
                 temp2 = visit(ctx.expr(1));
                 return (temp && temp2);
@@ -183,12 +201,12 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
                 return visit(ctx.expr(0));
             } else {
                 //beta AND
-                Stack<ParseTree> copia = new Stack<ParseTree>();
+                Stack<ParseTree> copia = (Stack<ParseTree>) pilha.clone();
                 copia = pilha;
                 setValor(ctx.expr(0), false);
                 setValor(ctx.expr(1), false);
                 temp = visit(ctx.expr(0));
-                pilha = copia;
+                pilha = (Stack<ParseTree>) copia.clone();
                 System.out.println("visitando segundo ramo do beta");
                 temp2 = visit(ctx.expr(1));
                 return (temp && temp2);
@@ -209,22 +227,6 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
         if (atomos.containsKey(ctx.getText())) {
             if (atomos.get(ctx.getText()) != getValor(ctx)) {
                 System.out.println("Contradição!\n");
-                // Get a set of the entries
-                Set set = atomos.entrySet();
-
-                // Get an iteravtor
-                Iterator it = set.iterator();
-
-                // Display elements
-                while (it.hasNext()) {
-                    Map.Entry me = (Map.Entry) it.next();
-                    System.out.print(me.getKey() + " - ");
-                    if ((Boolean) me.getValue())
-                        System.out.print("T; ");
-                    else
-                        System.out.print("F; ");
-                    System.out.print("\n");
-                }
                 return true; //true para formula valida!
             }
         } else {
@@ -232,7 +234,7 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
             atomos.put(ctx.getText(), getValor(ctx));
         }
 
-        Boolean retorno = true;
+        Boolean retorno = false;
         //ver se tem algo na stack
 
         if (!pilha.empty()) {

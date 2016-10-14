@@ -13,12 +13,11 @@ public class Tableaux {
         ExprLexer lexer = new ExprLexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         ExprParser parser = new ExprParser(tokens);
-        ParseTree tree = parser.tableaux(); // parse; start at prog
+        ParseTree tree = parser.prog(); // parse; start at prog
         System.out.println(tree.toStringTree(parser)); // print tree as text
          
         EvalVisitor eval = new EvalVisitor();
-        System.out.println(eval.visit(tree));
-
-        System.out.println("teste\n");
+        eval.visit(tree);
+        System.out.println("visitou!");
     }
 }

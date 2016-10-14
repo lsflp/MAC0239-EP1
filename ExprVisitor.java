@@ -10,17 +10,33 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface ExprVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link ExprParser#tableaux}.
+	 * Visit a parse tree produced by the {@code progrule}
+	 * labeled alternative in {@link ExprParser#prog}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitTableaux(ExprParser.TableauxContext ctx);
+	T visitProgrule(ExprParser.ProgruleContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link ExprParser#prog}.
+	 * Visit a parse tree produced by the {@code printExpr}
+	 * labeled alternative in {@link ExprParser#stat}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProg(ExprParser.ProgContext ctx);
+	T visitPrintExpr(ExprParser.PrintExprContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code assign}
+	 * labeled alternative in {@link ExprParser#stat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAssign(ExprParser.AssignContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code blank}
+	 * labeled alternative in {@link ExprParser#stat}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBlank(ExprParser.BlankContext ctx);
 	/**
 	 * Visit a parse tree produced by the {@code Op2Atom}
 	 * labeled alternative in {@link ExprParser#expr}.

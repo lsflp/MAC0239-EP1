@@ -5,7 +5,8 @@ import java.util.Iterator;
 import java.util.Stack;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
-import org.antlr.v4.runtime.misc.NotNull;
+import java.io.FileInputStream;
+import java.io.InputStream;
  
 public class EvalVisitor extends ExprBaseVisitor<Boolean> {
     ParseTreeProperty<Boolean> valores = new ParseTreeProperty<Boolean>();
@@ -92,9 +93,8 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override 
-    public Boolean visitProg(ExprParser.ProgContext ctx) {
-        System.out.println("Entrou em Prog!\n");
+    @Override public Boolean visitProgrule(ExprParser.ProgruleContext ctx) {
+        System.out.println("Entrou em Progrule!!\n");
         int totalfilhos = ctx.getChildCount();
 
         if (totalfilhos < 2) {
@@ -108,10 +108,10 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
             setValor(ctx.getChild(i), true);
         }
         setValor(ctx.getChild(totalfilhos - 1), false);
-
+        System.out.println("Filhos = " + totalfilhos);
         //popula stack
         pilha.push(ctx.getChild(totalfilhos - 1));
-        for (int i = totalfilhos - 2; i >= 0; i++) {
+        for (int i = totalfilhos - 2; i >= 0; i--) {
             pilha.push(ctx.getChild(i));
         }
         //retorna o valor pra o pop daquele stack
@@ -125,12 +125,11 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override 
-    public Boolean visitOp2Atom(ExprParser.Op2AtomContext ctx) {
+    @Override public Boolean visitOp2Atom(ExprParser.Op2AtomContext ctx) {
         System.out.println("Entrou em Op2Atom!!\n");
         Boolean temp;
         if (ctx.op.getType() == ExprParser.OR) { // expr .O. expr
-            if (getValor(ctx)) {
+            if (getValor((ParseTree) ctx)) {
                 //beta OR
                 //salvar a pilha
                 Stack<ParseTree> copia = new Stack<ParseTree>();
@@ -195,8 +194,7 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override 
-    public Boolean visitAtom(ExprParser.AtomContext ctx) {
+    @Override public Boolean visitAtom(ExprParser.AtomContext ctx) {
         System.out.println("Entrou em Atom!!\n");
         //adicionar no set
         if (atomos.containsKey(ctx.getText())) {
@@ -238,8 +236,7 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override 
-    public Boolean visitOpNot(ExprParser.OpNotContext ctx) {
+    @Override public Boolean visitOpNot(ExprParser.OpNotContext ctx) {
         System.out.println("Entrou em OpNot!!\n");
         if (getValor(ctx)) {
             //alpha NOT CONSERTAR
@@ -256,19 +253,26 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override 
-    public Boolean visitParen(ExprParser.ParenContext ctx) {
+    @Override public Boolean visitParen(ExprParser.ParenContext ctx) {
         System.out.println("Entrou em Paren!!\n");
         setValor(ctx.expr(), getValor(ctx));
         return visit(ctx.expr());
     }
 
-    public static void main(String[] args) {
-        String expression = "(.N. a) .A. a";
-        ExprLexer lexer = new ExprLexer(new ANTLRInputStream(expression));
-        ExprParser parser = new ExprParser(new CommonTokenStream(lexer));
-        ParseTree tree = parser.expr();
-        Boolean answer = new EvalVisitor().visit(tree);
-        System.out.println(expression + " = " + answer);
+    public static void main(String[] args) throws Exception {
+        InputStream is = (args.length == 0)
+            ?  System.in
+            : new FileInputStream(args[0]);
+         
+        ANTLRInputStream input = new ANTLRInputStream(is);
+        ExprLexer lexer = new ExprLexer(input);
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        ExprParser parser = new ExprParser(tokens);
+         
+        ParseTree tree = parser.prog();
+         System.out.println("O programa mudou!");
+        EvalVisitor eval = new EvalVisitor();
+        eval.visit(tree);
+        System.out.println(tree.toStringTree(parser));
     }
 }

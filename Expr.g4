@@ -1,8 +1,12 @@
 grammar Expr; 
 
-tableaux:	prog EOF;
-
-prog:	expr*;																												
+prog:	 stat+					#progrule
+	;					
+ 
+stat:   expr NEWLINE            # printExpr
+    |   ID '=' expr NEWLINE     # assign
+    |   NEWLINE                 # blank
+    ;
 
 expr:	op='.N.' expr								# OpNot
     |	expr op=('.O.'|'.A.'|'.I.') expr    		# Op2Atom
@@ -14,5 +18,6 @@ OR : '.O.';
 AND: '.A.';
 IMP: '.I.';
 NOT: '.N.';
-ID:       [a-z];  
-WHITESPACE : ( '\t' | ' ' | '\r' | '\n'| '\u000C' )+ -> skip ;
+ID:       [a-z];
+NEWLINE:    '\r'? '\n';
+WS:         [ \t]+ -> skip;

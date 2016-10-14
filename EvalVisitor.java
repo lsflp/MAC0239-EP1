@@ -14,7 +14,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
     Stack<ParseTree> pilha = new Stack<ParseTree>();
 
     //pega valor associado a um node
-    Boolean getValor(ParseTree ctx) { return valores.get(ctx); }
+    Boolean getValor(ParseTree ctx) {
+        return valores.get(ctx); 
+    }
 
     //altera valor associado a um node
     void setValor(ParseTree ctx, Boolean b) { valores.put(ctx, b); }
@@ -114,8 +116,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
         for (int i = totalfilhos - 2; i >= 0; i--) {
             pilha.push(ctx.getChild(i));
         }
+        Boolean saida = true;
         //retorna o valor pra o pop daquele stack
-        Boolean saida = visit(pilha.pop());
+        while (!pilha.empty() && saida) saida = visit(pilha.pop());
         System.out.println (saida);
         return saida;
     }
@@ -127,42 +130,46 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      */
     @Override public Boolean visitOp2Atom(ExprParser.Op2AtomContext ctx) {
         System.out.println("Entrou em Op2Atom!!\n");
-        Boolean temp;
+        Boolean temp, temp2;
         if (ctx.op.getType() == ExprParser.OR) { // expr .O. expr
             if (getValor((ParseTree) ctx)) {
                 //beta OR
-                //salvar a pilha
+                System.out.println("salvei a pilha"); //salvar a pilha
                 Stack<ParseTree> copia = new Stack<ParseTree>();
                 copia = pilha;
                 setValor(ctx.expr(0), true);
                 setValor(ctx.expr(1), true);
                 temp = visit(ctx.expr(0));
                 pilha = copia;
-                return (temp && visit(ctx.expr(1)));
+                System.out.println("visitando segundo ramo do beta");
+                temp2 = visit(ctx.expr(1));
+                return (temp && temp2);
             } else {
-                //alpha OR CONSERTAR
+                //alpha OR
                 setValor(ctx.expr(0), false);
                 setValor(ctx.expr(1), false);
-                //adicionar na stack
+                System.out.println("Empilhei"); //adicionar na stack
                 pilha.push(ctx.expr(1));
                 return visit(ctx.expr(0));
             }
         } else if (ctx.op.getType() == ExprParser.IMP) { // expr .I. expr
             if (getValor(ctx)) {
                 //beta IMP
-                //salvar a pilha
+                System.out.println("salvei a pilha"); //salvar a pilha
                 Stack<ParseTree> copia = new Stack<ParseTree>();
                 copia = pilha;
                 setValor(ctx.expr(0), false);
                 setValor(ctx.expr(1), true);
                 temp = visit(ctx.expr(0));
                 pilha = copia;
-                return (temp && visit(ctx.expr(1)));
+                System.out.println("visitando segundo ramo do beta");
+                temp2 = visit(ctx.expr(1));
+                return (temp && temp2);
             } else {
-                //alpha IMP CONSERTAR
+                //alpha IMP 
                 setValor(ctx.expr(0), true);
                 setValor(ctx.expr(1), false);
-                //adicionar na stack
+                System.out.println("Empilhei"); //adicionar na stack
                 pilha.push(ctx.expr(1));
                 return visit(ctx.expr(0));
             }
@@ -171,7 +178,7 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
                 //alpha AND
                 setValor(ctx.expr(0), true);
                 setValor(ctx.expr(1), true);
-                //adicionar na stack
+                System.out.println("Empilhei"); //adicionar na stack
                 pilha.push(ctx.expr(1));
                 return visit(ctx.expr(0));
             } else {
@@ -182,7 +189,9 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
                 setValor(ctx.expr(1), false);
                 temp = visit(ctx.expr(0));
                 pilha = copia;
-                return (temp && visit(ctx.expr(1)));
+                System.out.println("visitando segundo ramo do beta");
+                temp2 = visit(ctx.expr(1));
+                return (temp && temp2);
             }
         } else {
             throw new IllegalStateException();
@@ -198,8 +207,8 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
         System.out.println("Entrou em Atom!!\n");
         //adicionar no set
         if (atomos.containsKey(ctx.getText())) {
-            if (atomos.get(ctx.getText()) == getValor(ctx)) {
-                System.out.println("Contradição! Fórmula não é válida!\n");
+            if (atomos.get(ctx.getText()) != getValor(ctx)) {
+                System.out.println("Contradição!\n");
                 // Get a set of the entries
                 Set set = atomos.entrySet();
 
@@ -216,16 +225,20 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
                         System.out.print("F; ");
                     System.out.print("\n");
                 }
-                return false;
+                return true; //true para formula valida!
             }
-        } else 
+        } else {
+            //System.out.println("Colocando em atomos: " + ctx.getText() + " com valor " + getValor(ctx));
             atomos.put(ctx.getText(), getValor(ctx));
+        }
 
         Boolean retorno = true;
         //ver se tem algo na stack
 
-        if (!pilha.empty())
+        if (!pilha.empty()) {
+            System.out.println("Desempilhei!!");
             retorno = visit(pilha.pop());
+        }
 
         atomos.remove(ctx.getText());
         return retorno;
@@ -239,10 +252,12 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
     @Override public Boolean visitOpNot(ExprParser.OpNotContext ctx) {
         System.out.println("Entrou em OpNot!!\n");
         if (getValor(ctx)) {
-            //alpha NOT CONSERTAR
+            //System.out.println("entrounot a");
+            //alpha NOT
             setValor(ctx.expr(), false);
         } else {
             //beta NOT
+            //System.out.println("entrounot b");
             setValor(ctx.expr(), true);
         }
         return visit(ctx.expr());
@@ -255,6 +270,12 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      */
     @Override public Boolean visitParen(ExprParser.ParenContext ctx) {
         System.out.println("Entrou em Paren!!\n");
+        setValor(ctx.expr(), getValor(ctx));
+        return visit(ctx.expr());
+    }
+
+    @Override public Boolean visitPrintExpr(ExprParser.PrintExprContext ctx) {
+        System.out.println("Entrou em PrintEx!!\n");
         setValor(ctx.expr(), getValor(ctx));
         return visit(ctx.expr());
     }

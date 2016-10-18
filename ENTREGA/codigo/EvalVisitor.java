@@ -64,23 +64,6 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
             System.out.println("O sequente é válido!");
         else {
             System.out.println("O sequente é inválido!");
-            
-            // Pega o conjunto das entradas
-            Set set = atomos.entrySet();
-
-            // Faz um iterador
-            Iterator it = set.iterator();
-            
-            // Mostra os elementos
-            while (it.hasNext()) {
-                Map.Entry me = (Map.Entry) it.next();
-                System.out.print(me.getKey() + " - ");
-                if ((Boolean) me.getValue())
-                    System.out.print("T; ");
-                else
-                    System.out.print("F; ");
-                System.out.print("\n");
-            }
         }
         return saida;
     }
@@ -170,7 +153,7 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
      * <p>The default implementation returns the result of calling
      * {@link #visitChildren} on {@code ctx}.</p>
      */
-    @Override public Boolean visitAtom(ExprParser.AtomContext ctx) {        
+    @Override public Boolean visitAtom(ExprParser.AtomContext ctx) {    
         // Adicionar no set
         if (atomos.containsKey(ctx.getText())) {
             if (atomos.get(ctx.getText()) != getValor(ctx)) {
@@ -188,6 +171,22 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
 
         if (!pilha.empty()) {
             retorno = visit(pilha.pop());
+        }
+
+        if (!retorno) {
+            System.out.println("O sequente é inválido!");
+            for (Map.Entry<String, Boolean> entry : atomos.entrySet()) {
+                String key = entry.getKey();
+                Boolean value = entry.getValue();
+
+                System.out.print(key + " - ");
+                if (value)
+                    System.out.print("T; ");
+                else
+                    System.out.print("F; ");
+                System.out.print("\n");
+            }
+            System.exit(0);
         }
 
         atomos.remove(ctx.getText());

@@ -1,0 +1,23 @@
+A ANTLR gera a árvore com os componentes do analisador léxico derivados da gramática. Ele gera o ExprBaseVisitor que define algumas funções que serão executadas quando visitamos alguma estrutura na árvore gerada por ele, por exemplo o Progrule que executa o código quando visitamos a estrutura raiz da nossa gramática (visitProgrule).
+E cada estrutura de expr dessa árvore possui um valor associado no ParseTreeProperty VALORES (é uma estrutura que associa algo a um nó da árvore) que pode ser T true ou F false.
+Basicamente o que eu fiz foi colocar todas as estruturas expr em uma pilha e valorando todas as premissas expr como T true e a conclusão B como false e retornei a saída como o valor de retorno da visita da estrutura "popada" da pilha.
+Com as visitas recursivas de acordo com a estrutura visitada (com as funções geradas pela ANTLR) pude definir o que fazer quando entro em situação de operação entre dois elementos (implies, and e or - visitOp2Atom), quando visita um elemento átomo (visitAtom), operação de negação (visitOpNot), quando encontra um parênteses (visitParen) ou uma expr comum (visitPrintExpr).
+Quando uma operação de beta é realizada:
+	copia-se a pilha global;
+	valora-se cada ramo da árvore na estrurura filha em VALORES (do ParseTreeProperty) de acordo com a tabela de operações beta;
+	coloca-se em uma variável temporária o resultado da visita no ramo esquerdo;
+	substitui a pilha pelá cópia anterior;
+	coloca-se em outra variável temporária o resultado da visita no ramo direito ;
+	retorna um AND entre as duas saídas.
+Quando uma operação de alpha é realizada:
+	valora-se cada ramo da árvore na estrurura filha em VALORES (do ParseTreeProperty) de acordo com a tabela de operações beta;
+	empilha a estrutura filha da direita na pilha global;
+	retorna o valor da visita na estrutura filha da esquerda.
+Quando uma operação de negação:
+	valora-se a única expressão filha como o valor contrário ao valor associado a essa expressão em VALORES;
+	visita-se a expressão filha.
+Quando um parenteses ou expressão sozinha:
+	valora-se expressão filha em VALORES como valor da expressao atual;
+	visita-se expressão filha;
+Quando chega em um átomo:
+	Verifica se aquele átomo já possui alguma valor na TreeMap ATOMOS, caso já possua algum valor nessa TreeMap, verifica se o valor associado àquela estrutura no VALORES e no ATOMOS são diferentes. No caso em que são diferentes então encontramos uma contradição (o que não descarta que a expressão é inválida) e então temos um ramo fechado e retornamos um true. Caso não sejam diferentes então vemos se existe algo na pilha, associando um valor de retorno para a "popada" de um elemento da pilha. Ao terminar, se o valor de retorno for false então encontramos uma situação em que o sequente é inválido, exibimos todos os átomos e seus valores em ATOMOS e encerramos o programa.

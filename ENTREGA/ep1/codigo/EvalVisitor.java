@@ -168,13 +168,13 @@ public class EvalVisitor extends ExprBaseVisitor<Boolean> {
         Boolean retorno = false;
         
         // Ver se tem algo na pilha
-
         if (!pilha.empty()) {
             retorno = visit(pilha.pop());
         }
 
+        // Imprimindo o contraexemplo.
         if (!retorno) {
-            System.out.println("O sequente é inválido!");
+            System.out.println("O sequente é inválido!\n\nContraexemplo:");
             for (Map.Entry<String, Boolean> entry : atomos.entrySet()) {
                 String key = entry.getKey();
                 Boolean value = entry.getValue();

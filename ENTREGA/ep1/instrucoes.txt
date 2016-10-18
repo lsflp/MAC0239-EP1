@@ -7,10 +7,10 @@ COMO UTILIZAR O PROGRAMA (PROVADOR DE TEOREMAS)
 
 Nós utilizamos a biblioteca ANTLR para análise léxica. Então, para executar o
 programa, é necessário que ela seja instalada. Para isso, basta rodar o script
-install.sh
+instalar.sh
 
-	$ chmod +x install.sh
-	$ ./install.sh
+	$ chmod +x instalar.sh
+	$ ./instalar.sh
 
 O programa (assim como seus códigos auxiliares), estão na pasta codigo. Para 
 acessá-la:
@@ -43,4 +43,5 @@ A_n
 B
 
 Onde A_1, A_2, ... , A_n são as premissas e B é a consequência. Note que cada
-uma das fórmulas deve estar em uma linha.
+uma das fórmulas deve estar em uma linha. Deve haver uma linha vazia no fim do 
+arquivo.

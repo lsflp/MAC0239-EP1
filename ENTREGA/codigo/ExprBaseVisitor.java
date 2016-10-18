@@ -1,13 +1,3 @@
-//  Nomes: Bruno Rafael Aricó                               Números USP: 8125459
-//         Isabela Blucher                                               9298170
-//         Luís Felipe de Melo Costa Silva                               9297961
-//         Nícolas Nogueira L. da Silva                                  9277541
-// 
-//  Arquivo:   ExprBaseVisitor.java
-//  Descrição: Arquivo gerado pela biblioteca ANTLR. É um dos arquivos que irá
-//             auxiliar na análise léxica da entrada. Foi baseado na gramática
-//             descrita em Expr.g4
-
 // Generated from Expr.g4 by ANTLR 4.5.3
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
